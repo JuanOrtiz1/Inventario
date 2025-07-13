@@ -1,0 +1,14 @@
+# Usar una imagen oficial de Java como base
+FROM eclipse-temurin:17-jdk-alpine
+
+# Directorio de trabajo dentro del contenedor
+WORKDIR /app
+
+# Copiar el JAR generado al contenedor
+COPY target/*.jar app.jar
+
+# Exponer el puerto (puede ser 8081 o 8082 según el servicio)
+EXPOSE 8080
+
+# Comando para ejecutar la aplicación
+ENTRYPOINT ["java", "-jar", "app.jar"]

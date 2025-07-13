@@ -1,0 +1,59 @@
+version: '3.9'
+
+services:
+
+  postgres:
+    image: postgres:15
+    container_name: db-postgres
+    environment:
+      POSTGRES_DB: linktic
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  productos:
+    build:
+      context: ./productos
+    container_name: micro-productos
+    ports:
+      - "8083:8080"  # Cambiado a 8083
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/linktic
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SERVER_PORT=8080
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+
+  inventario:
+    build:
+      context: ./inventario
+    container_name: micro-inventario
+    ports:
+      - "8084:8080"  # Cambiado a 8084
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/linktic_bd
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=admin
+      - SERVER_PORT=8080
+      - PRODUCTOS_URL=http://micro-productos:8080/productos
+      - API_KEY=micro123
+    depends_on:
+      - postgres
+      - productos
+    networks:
+      - app-network
+
+volumes:
+  postgres_data:
+
+networks:
+  app-network:
+    driver: bridge
